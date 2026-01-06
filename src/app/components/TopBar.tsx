@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { useRef, useState, useLayoutEffect } from "react";
 import svgPaths from "../../imports/svg-7qj6ackrj5";
 
@@ -85,8 +85,8 @@ export default function TopBar({
   }, [activeTab, isSettingsOpen]); // Recalculate when settings open state changes too
 
   return (
-    <div className="relative shrink-0 w-full px-[16px] pb-[16px]">
-      <div className="content-stretch flex gap-[20px] items-start relative w-full">
+    <div className="relative shrink-0 w-full px-0 pb-[8px]">
+      <div className="content-stretch flex gap-[20px] items-start relative w-full" style={{ paddingLeft: '12px' }}>
         {/* Close Button */}
         <button 
           onClick={onClose}
@@ -115,22 +115,23 @@ export default function TopBar({
         </button>
 
         {/* Main Menu and Settings */}
-        <div className="basis-0 content-stretch flex grow items-start justify-end min-h-px min-w-px relative shrink-0">
+        <div className="basis-0 content-stretch flex grow items-end justify-center gap-[8px] min-h-px min-w-px relative shrink-0 overflow-visible">
           
-          <AnimatePresence mode="popLayout" initial={false}>
-            {!isSettingsOpen ? (
-              /* Tab Menu */
-              <motion.div 
-                key="main-menu"
-                initial={{ opacity: 0, x: -20, filter: "blur(5px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: -20, filter: "blur(5px)" }}
-                transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-                ref={containerRef}
-                className={`${
-                  isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-white"
-                } content-stretch flex gap-[12px] items-center justify-center pl-[5px] pr-[8px] py-[5px] relative rounded-[13px] shadow-[0px_0px_0.5px_0px_rgba(0,0,0,0.3),0px_1px_3px_0px_rgba(0,0,0,0.15)] shrink-0 transition-colors duration-300 mr-2`}
-              >
+          {/* Tab Menu - Animated visibility */}
+          <motion.div 
+            ref={containerRef}
+            className={`${
+              isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-white"
+            } content-stretch flex gap-[12px] items-center justify-center pr-[8px] py-[5px] relative rounded-[13px] shadow-[0px_0px_0.5px_0px_rgba(0,0,0,0.3),0px_1px_3px_0px_rgba(0,0,0,0.15)] shrink-0 transition-colors duration-300`}
+            animate={{
+              x: isSettingsOpen ? 0 : 190,
+              paddingLeft: isSettingsOpen ? 8 : 40,
+            }}
+            transition={{
+              ease: [0.4, 0.0, 0.2, 1],
+              duration: 0.3
+            }}
+          >
                 {/* Sliding active tab indicator */}
                 <motion.div
                   className={`absolute ${
@@ -139,7 +140,9 @@ export default function TopBar({
                   style={{
                     height: "calc(100% - 10px)",
                     width: "55px",
-                    top: "5px"
+                    top: "6px",
+                    transform: "translateX(5px)",
+                    left: "-1px"
                   }}
                   animate={{
                     x: tabPositions ? tabPositions[activeTab] : 0
@@ -200,19 +203,134 @@ export default function TopBar({
                     <p className="leading-none">Statement</p>
                   </div>
                 </motion.button>
-              </motion.div>
-            ) : (
-              /* Settings Menu */
-              <motion.div 
-                key="settings-menu"
-                initial={{ opacity: 0, x: 20, filter: "blur(5px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: 20, filter: "blur(5px)" }}
-                transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-                className={`${
-                  isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-white"
-                } content-stretch flex gap-[12px] items-center justify-center pl-[5px] pr-[8px] py-[5px] relative rounded-[13px] shadow-[0px_0px_0.5px_0px_rgba(0,0,0,0.3),0px_1px_3px_0px_rgba(0,0,0,0.15)] shrink-0 transition-colors duration-300 mr-2`}
-              >
+          </motion.div>
+
+          {/* Settings Menu - Always visible */}
+          <motion.div 
+            className={`${
+              isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-white"
+            } content-stretch flex gap-[12px] items-center justify-center pl-[40px] pr-[8px] py-[5px] relative rounded-[13px] shadow-[0px_0px_0.5px_0px_rgba(0,0,0,0.3),0px_1px_3px_0px_rgba(0,0,0,0.15)] shrink-0 transition-colors duration-300`}
+          >
+            {/* Settings Button - positioned absolutely over settings menu */}
+            <motion.button
+              onClick={onSettingsToggle}
+              className="h-[65px] absolute shrink-0 w-[26px] overflow-visible"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                x: isSettingsOpen ? 0 : -13,
+              }}
+              transition={{
+                type: "",
+                stiffness: 4,
+                damping: 30
+              }}
+              style={{
+                right: 0,
+                top: 0,
+                zIndex: 20,
+                clipPath: ""
+              }}
+            >
+              <div className="absolute top-[-3.08%] bottom-[-6.15%] left-0 right-0">
+                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 71">
+                  <g>
+                    <g filter="url(#filter0_dd_settings)">
+                      <path d={svgPaths.p2b2ac280} fill={isDark ? "rgba(255,255,255,0.1)" : "white"} />
+                    </g>
+                    {/* FIX #6: Morphing dots to chevron */}
+                    <g>
+                      {/* Top dot/line */}
+                      <motion.line
+                        x1="13.5"
+                        y1="28.5"
+                        x2="13.5"
+                        y2="28.5"
+                        stroke={isDark ? "white" : "#00071A"}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        animate={{
+                          x2: isSettingsOpen ? 17.5 : 13.5,
+                          y2: isSettingsOpen ? 24.5 : 28.5
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25
+                        }}
+                      />
+                      {/* Middle dot - moves to tip */}
+                      <motion.circle
+                        cx="13.5"
+                        cy="34.5"
+                        r="1.5"
+                        fill={isDark ? "white" : "#00071A"}
+                        animate={{
+                          cx: isSettingsOpen ? 18.5 : 13.5,
+                          cy: isSettingsOpen ? 34.5 : 34.5,
+                          opacity: isSettingsOpen ? 0 : 1
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25
+                        }}
+                      />
+                      {/* Arrow tip when open */}
+                      <motion.circle
+                        cx="18.5"
+                        cy="34.5"
+                        r="1.5"
+                        fill={isDark ? "white" : "#00071A"}
+                        animate={{
+                          opacity: isSettingsOpen ? 1 : 0
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25
+                        }}
+                      />
+                      {/* Bottom dot/line */}
+                      <motion.line
+                        x1="13.5"
+                        y1="40.5"
+                        x2="13.5"
+                        y2="40.5"
+                        stroke={isDark ? "white" : "#00071A"}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        animate={{
+                          x2: isSettingsOpen ? 17.5 : 13.5,
+                          y2: isSettingsOpen ? 44.5 : 40.5
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25
+                        }}
+                      />
+                    </g>
+                  </g>
+                  <defs>
+                    <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="71" id="filter0_dd_settings" width="32" x="0" y="0">
+                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                      <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                      <feOffset dy="1" />
+                      <feGaussianBlur stdDeviation="1.5" />
+                      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" />
+                      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_settings" />
+                      <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                      <feOffset />
+                      <feGaussianBlur stdDeviation="0.25" />
+                      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0" />
+                      <feBlend in2="effect1_dropShadow_settings" mode="normal" result="effect2_dropShadow_settings" />
+                      <feBlend in="SourceGraphic" in2="effect2_dropShadow_settings" mode="normal" result="shape" />
+                    </filter>
+                  </defs>
+                </svg>
+              </div>
+            </motion.button>
                  {/* Language Button */}
                  <motion.button
                   onClick={onLanguageClick}
@@ -263,116 +381,7 @@ export default function TopBar({
                     <p className="leading-none">{isDark ? "Light UI" : "Dark UI"}</p>
                   </div>
                 </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Settings Button with morph animation */}
-          <motion.button
-            onClick={onSettingsToggle}
-            className="h-[65px] relative shrink-0 w-[26px]"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <div className="absolute inset-[-3.08%_-11.54%_-6.15%_-11.54%]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 71">
-                <g>
-                  <g filter="url(#filter0_dd_settings)">
-                    <path d={svgPaths.p2b2ac280} fill={isDark ? "rgba(255,255,255,0.1)" : "white"} />
-                  </g>
-                  {/* FIX #6: Morphing dots to chevron */}
-                  <g>
-                    {/* Top dot/line */}
-                    <motion.line
-                      x1="13.5"
-                      y1="28.5"
-                      x2="13.5"
-                      y2="28.5"
-                      stroke={isDark ? "white" : "#00071A"}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      animate={{
-                        x2: isSettingsOpen ? 17.5 : 13.5,
-                        y2: isSettingsOpen ? 24.5 : 28.5
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
-                      }}
-                    />
-                    {/* Middle dot - moves to tip */}
-                    <motion.circle
-                      cx="13.5"
-                      cy="34.5"
-                      r="1.5"
-                      fill={isDark ? "white" : "#00071A"}
-                      animate={{
-                        cx: isSettingsOpen ? 18.5 : 13.5,
-                        cy: isSettingsOpen ? 34.5 : 34.5,
-                        opacity: isSettingsOpen ? 0 : 1
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
-                      }}
-                    />
-                    {/* Arrow tip when open */}
-                    <motion.circle
-                      cx="18.5"
-                      cy="34.5"
-                      r="1.5"
-                      fill={isDark ? "white" : "#00071A"}
-                      animate={{
-                        opacity: isSettingsOpen ? 1 : 0
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
-                      }}
-                    />
-                    {/* Bottom dot/line */}
-                    <motion.line
-                      x1="13.5"
-                      y1="40.5"
-                      x2="13.5"
-                      y2="40.5"
-                      stroke={isDark ? "white" : "#00071A"}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      animate={{
-                        x2: isSettingsOpen ? 17.5 : 13.5,
-                        y2: isSettingsOpen ? 44.5 : 40.5
-                      }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
-                      }}
-                    />
-                  </g>
-                </g>
-                <defs>
-                  <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="71" id="filter0_dd_settings" width="32" x="0" y="0">
-                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                    <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-                    <feOffset dy="1" />
-                    <feGaussianBlur stdDeviation="1.5" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" />
-                    <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_settings" />
-                    <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-                    <feOffset />
-                    <feGaussianBlur stdDeviation="0.25" />
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0" />
-                    <feBlend in2="effect1_dropShadow_settings" mode="normal" result="effect2_dropShadow_settings" />
-                    <feBlend in="SourceGraphic" in2="effect2_dropShadow_settings" mode="normal" result="shape" />
-                  </filter>
-                </defs>
-              </svg>
-            </div>
-          </motion.button>
+          </motion.div>
         </div>
       </div>
     </div>
